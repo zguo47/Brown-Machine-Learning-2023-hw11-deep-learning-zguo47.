@@ -92,16 +92,15 @@ class CNN(nn.Module):
         # HINT: torch.nn.Conv2d, torch.nn.Linear, torch.nn.Flatten,
         #       torch.nn.Sigmoid, torch.nn.ReLU,
         self.model = nn.Sequential(
-            torch.nn.Conv2d(input_channels, 24, 3),
+            torch.nn.Conv2d(input_channels, 16, 3),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(24, 32, 3),
+            torch.nn.Conv2d(16, 32, 3),
             torch.nn.ReLU(),
             torch.nn.Conv2d(32, 64, 3),
             torch.nn.ReLU(),
             torch.nn.Flatten(),
-            torch.nn.Linear(64, 32),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(32, class_num)
+            torch.nn.Linear(256, class_num)
+
         )
 
     def forward(self, X):
@@ -150,7 +149,7 @@ def train(model, dataloader, loss_func, optimizer, num_epoch, correct_num_func=N
     # TODO: Tell the model we are in the training phase. HINT: model.train()
     # This is useful if you use batch normalization or dropout
     # because the behavior of these layers in the training phase is different from testing phase.
-    model.train(True)
+    model.train()
 
     # train network for num_epochs
     for epoch in range(num_epoch):
@@ -258,7 +257,7 @@ def test(model, dataloader, loss_func, correct_num_func=None):
     sum_corr = 0
 
     # TODO: Tell the model we are in the testing phase. HINT: model.eval()
-    model.eval(True)
+    model.eval()
 
     # TODO: During testing, we don't need to calculate gradients. HINT: use 'with torch.no_grad():'
     with torch.no_grad():

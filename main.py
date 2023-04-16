@@ -27,13 +27,13 @@ def test_linear_nn(test_size=0.2, nn_type='one_layer'):
     # TODO: Tune these hyper-parameters
     if nn_type == "one_layer":
         # Hyper-parameters of OneLayerNN
-        batch_size = 15  # batch size
-        num_epoch = 10  # number of training epochs
-        learning_rate = 0.001  # learning rate
+        batch_size = 64  # batch size
+        num_epoch = 25  # number of training epochs
+        learning_rate = 0.01  # learning rate
     else:
         # Hyper-parameters of TwoLayerNN
-        batch_size = 15  # batch size
-        num_epoch = 10  # number of training epochs
+        batch_size = 64  # batch size
+        num_epoch = 25  # number of training epochs
         learning_rate = 0.001  # learning rate
 
     # Load data
@@ -74,8 +74,8 @@ def test_cnn(test_size=0.2):
     """
     # TODO: Tune these hyper-parameters
     # Hyper-parameters of CNN
-    batch_size = 15  # batch size
-    num_epoch = 10  # number of training epochs
+    batch_size = 64  # batch size
+    num_epoch = 25  # number of training epochs
     learning_rate = 0.001  # learning rate
 
     # Load data
@@ -120,9 +120,9 @@ def main():
     torch.manual_seed(0)
 
     # Uncomment to test your models
-    # test_linear_nn(nn_type='one_layer')
+    test_linear_nn(nn_type='one_layer')
     test_linear_nn(nn_type='two_layer')
-    # test_cnn()
+    test_cnn()
 
 
 if __name__ == "__main__":
