@@ -68,6 +68,7 @@ class MNISTDataset(Dataset):
         """
         x = self.X[index]
         # TODO: Reshape vector x to [1, self.h, self.w]
+        x = x.reshape(1, self.h, self.w)
 
         return x, self.Y[index]
 

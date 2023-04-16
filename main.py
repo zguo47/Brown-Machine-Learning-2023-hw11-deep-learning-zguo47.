@@ -1,3 +1,6 @@
+import os
+
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from models import OneLayerNN, TwoLayerNN, CNN, train, test, correct_predict_num
 from utils import get_mnist_loader, get_wine_loader, \
     visualize_loss, visualize_accuracy, visualize_image, visualize_confusion_matrix, visualize_misclassified_image
@@ -7,6 +10,7 @@ import random
 
 import torch
 from torch import nn, optim
+
 
 
 def test_linear_nn(test_size=0.2, nn_type='one_layer'):
@@ -23,14 +27,14 @@ def test_linear_nn(test_size=0.2, nn_type='one_layer'):
     # TODO: Tune these hyper-parameters
     if nn_type == "one_layer":
         # Hyper-parameters of OneLayerNN
-        batch_size = 1  # batch size
-        num_epoch = 1  # number of training epochs
-        learning_rate = 0.1  # learning rate
+        batch_size = 15  # batch size
+        num_epoch = 10  # number of training epochs
+        learning_rate = 0.001  # learning rate
     else:
         # Hyper-parameters of TwoLayerNN
-        batch_size = 1  # batch size
-        num_epoch = 1  # number of training epochs
-        learning_rate = 0.1  # learning rate
+        batch_size = 15  # batch size
+        num_epoch = 10  # number of training epochs
+        learning_rate = 0.001  # learning rate
 
     # Load data
     dataloader_train, dataloader_test = get_wine_loader(batch_size=batch_size, test_size=test_size)
@@ -39,19 +43,19 @@ def test_linear_nn(test_size=0.2, nn_type='one_layer'):
     if nn_type == "one_layer":
         model = OneLayerNN(input_features=11)
         # TODO: Initialize optimizer
-        optimizer = None
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     else:
         model = TwoLayerNN(input_features=11)
         # TODO: Initialize optimizer
-        optimizer = None
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     # TODO: Initialize the MSE (i.e., L2) loss function
-    loss_func = None
+    loss_func = torch.nn.MSELoss()
 
     losses = train(model, dataloader_train, loss_func, optimizer, num_epoch)
 
     # Uncomment to visualize training losses
-    # visualize_loss(losses)
+    visualize_loss(losses)
 
     # Average training/testing loss
     loss_train = test(model, dataloader_train, loss_func)
@@ -70,9 +74,9 @@ def test_cnn(test_size=0.2):
     """
     # TODO: Tune these hyper-parameters
     # Hyper-parameters of CNN
-    batch_size = 1  # batch size
-    num_epoch = 1  # number of training epochs
-    learning_rate = 0.1  # learning rate
+    batch_size = 15  # batch size
+    num_epoch = 10  # number of training epochs
+    learning_rate = 0.001  # learning rate
 
     # Load data
     # TODO: Set to True when doing the third report question
@@ -84,10 +88,10 @@ def test_cnn(test_size=0.2):
     model = CNN()
 
     # TODO: Initialize optimizer
-    optimizer = None
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     # TODO: Initialize the cross entropy loss function
-    loss_func = None
+    loss_func = torch.nn.CrossEntropyLoss()
 
     losses, accuracies = train(model, dataloader_train, loss_func, optimizer, num_epoch,
                                correct_num_func=correct_predict_num)
@@ -100,11 +104,11 @@ def test_cnn(test_size=0.2):
 
     # Uncomment to visualize training losses, training accuracies, test set images,
     # misclassified test set images, and confusion matrix
-    # visualize_loss(losses)
-    # visualize_accuracy(accuracies)
-    # visualize_image(model, dataloader_test, 4, 4)
-    # visualize_misclassified_image(model, dataloader_test, 4, 4)
-    # visualize_confusion_matrix(model, dataloader_test)
+    visualize_loss(losses)
+    visualize_accuracy(accuracies)
+    visualize_image(model, dataloader_test, 4, 4)
+    visualize_misclassified_image(model, dataloader_test, 4, 4)
+    visualize_confusion_matrix(model, dataloader_test)
     
     return accuracy_test
 
@@ -117,7 +121,7 @@ def main():
 
     # Uncomment to test your models
     # test_linear_nn(nn_type='one_layer')
-    # test_linear_nn(nn_type='two_layer')
+    test_linear_nn(nn_type='two_layer')
     # test_cnn()
 
 

@@ -15,6 +15,7 @@ class OneLayerNN(nn.Module):
         :param input_features: The number of features of each sample.
         """
         super().__init__()
+        self.layer = torch.nn.Linear(input_features, 1)
 
         # TODO: Initialize a linear layer. HINT: torch.nn.Linear
 
@@ -28,6 +29,7 @@ class OneLayerNN(nn.Module):
         """
 
         # TODO: Apply the linear layer defined in __init__() to input features X
+        return self.layer(X)
 
 
 class TwoLayerNN(nn.Module):
@@ -40,13 +42,18 @@ class TwoLayerNN(nn.Module):
         super().__init__()
 
         # TODO: Tune the hidden size hyper-parameter
-        self.hidden_size = None
+        self.hidden_size = 32
 
         # TODO: Initialize a linear layer. HINT: torch.nn.Linear
+        self.layer1 = torch.nn.Linear(input_features, self.hidden_size)
 
         # TODO: Initialize a sigmoid activation layer. HINT: torch.nn.Sigmoid
+        self.activation = torch.nn.Sigmoid()
 
         # TODO: Initialize another linear layer
+        self.layer2 = torch.nn.Linear(self.hidden_size, 1)
+
+        self.model = torch.nn.Sequential(self.layer1, self.activation, self.layer2)
 
     def forward(self, X):
         """
@@ -58,7 +65,7 @@ class TwoLayerNN(nn.Module):
         """
 
         # TODO: Apply the layers defined in __init__() to input features X
-        pass
+        return self.model(X)
 
 
 class CNN(nn.Module):
@@ -84,6 +91,18 @@ class CNN(nn.Module):
 
         # HINT: torch.nn.Conv2d, torch.nn.Linear, torch.nn.Flatten,
         #       torch.nn.Sigmoid, torch.nn.ReLU,
+        self.model = nn.Sequential(
+            torch.nn.Conv2d(input_channels, 24, 3),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(24, 32, 3),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 64, 3),
+            torch.nn.ReLU(),
+            torch.nn.Flatten(),
+            torch.nn.Linear(64, 32),
+            torch.nn.Sigmoid(),
+            torch.nn.Linear(32, class_num)
+        )
 
     def forward(self, X):
         """
@@ -95,7 +114,7 @@ class CNN(nn.Module):
         """
 
         # TODO: Apply the layers defined in __init__() to input features X
-        pass
+        return self.model(X)
 
 
 def train(model, dataloader, loss_func, optimizer, num_epoch, correct_num_func=None, print_info=True):
@@ -123,12 +142,15 @@ def train(model, dataloader, loss_func, optimizer, num_epoch, correct_num_func=N
 
     # TODO: Initializing variables
     # Initialize an empty list to save average losses in all epochs.
+    avg_loss = []
 
     # Initialize an empty list to save accuracy values in all epochs.
+    acc_val = []
 
     # TODO: Tell the model we are in the training phase. HINT: model.train()
     # This is useful if you use batch normalization or dropout
     # because the behavior of these layers in the training phase is different from testing phase.
+    model.train(True)
 
     # train network for num_epochs
     for epoch in range(num_epoch):
@@ -144,36 +166,49 @@ def train(model, dataloader, loss_func, optimizer, num_epoch, correct_num_func=N
         epoch_correct_num = 0
 
         # TODO: Iterate through batches. HINT: for X, Y in dataloader:
+        for X, Y in dataloader:
 
             # TODO: Run a forward pass and get model output
+            output = model.forward(X)
 
             # TODO: Set all gradients to zero by calling optimizer.zero_grad()
+            optimizer.zero_grad()
 
             # TODO: Calculate loss of this batch
+            loss = loss_func(output, Y)
 
             # TODO: Run a backward pass by calling loss.backward(),
             #  where loss is the output of the loss function.
+            loss.backward()
 
             # TODO: Update parameters by calling optimizer.step()
+            optimizer.step()
 
             # TODO: Increase epoch_loss_sum by (loss * #samples in the current batch)
             #  Use loss.item() to get the python scalar of loss value because the output of
             #   loss function also contains gradient information, which takes a lot of memory.
             #  Use X.shape[0] to get the number of samples in the current batch.
+            epoch_loss_sum += loss.item() * X.shape[0]
 
             
             # TODO: Calculate the number of correct predictions for CNN on MNIST
+            num_correct_pred = correct_predict_num(output, Y)
 
             # TODO: When correct_num_func is not None,
             #  increase epoch_correct_num by #correct predictions in the current batch
+            if correct_num_func != None:
+                epoch_correct_num += num_correct_pred
 
         # TODO: Append the average loss of the current epoch to your list.
         #  You can get the number of training samples by len(dataloader.dataset)
+        avg_loss.append(epoch_loss_sum / len(dataloader.dataset))
 
         # TODO: When correct_num_func is not None,
         #  calculate average accuracy for CNN on MNIST if correct_num_func:
         #  Append the average accuracy of the current epoch to your list.
         #  You can get the number of training samples by len(dataloader.dataset)
+        if correct_num_func != None:
+            acc_val.append(epoch_correct_num / len(dataloader.dataset))
         
         # Print the loss after every epoch. Print accuracies if specified
         if print_info:
@@ -184,6 +219,10 @@ def train(model, dataloader, loss_func, optimizer, num_epoch, correct_num_func=N
 
     # TODO: When correct_num_func is None, only return a list of average losses.
     #  When correct_num_func is not None, return a list of average losses and a list of accuracies.
+    if correct_num_func == None:
+        return avg_loss
+    else:
+        return avg_loss, acc_val
 
 
 def test(model, dataloader, loss_func, correct_num_func=None):
@@ -215,27 +254,41 @@ def test(model, dataloader, loss_func, correct_num_func=None):
     # TODO: Initalizing variables
         # Initialize sum of losses in an epoch. Will be used to calculate average loss.
         # Initialize sum of the number of correct predictions. Will be used to calculate average accuracy for CNN.
+    sum_loss = 0
+    sum_corr = 0
 
     # TODO: Tell the model we are in the testing phase. HINT: model.eval()
+    model.eval(True)
 
     # TODO: During testing, we don't need to calculate gradients. HINT: use 'with torch.no_grad():'
+    with torch.no_grad():
 
         # TODO: Iterate through batches.
+        for X, Y in dataloader:
 
             # TODO: Run a forward pass and get model output
+            output = model.forward(X)
 
             # TODO: Calculate loss of this batch
+            loss = loss_func(output, Y)
 
             # TODO: Increase loss sum by (loss * #samples in the current batch)
             #  Use loss.item() to get the python scalar of loss value.
             #  Use X.shape[0] to get the number of samples in the current batch.
+            sum_loss += loss.item() * X.shape[0]
 
             # TODO: When correct_num_func is not None, calculate the number of correct predictions for CNN on MNIST
             #  Increase the total number of correct predictions by #correct predictions in the current batch
+            num_correct_pred = correct_predict_num(output, Y)
+            if correct_num_func != None:
+                sum_corr += num_correct_pred
                 
     # TODO: When correct_num_func is None, return average loss.
     #  When correct_num_func is not None, return average loss and accuracy.
-    pass
+    if correct_num_func == None:
+        return sum_loss / len(dataloader.dataset)
+    else:
+        return sum_loss / len(dataloader.dataset), sum_corr / len(dataloader.dataset)
 
 
 def correct_predict_num(logit, target):
@@ -252,4 +305,4 @@ def correct_predict_num(logit, target):
     # HINT: torch.sum, torch.argmax
     # You may need .long() to convert a torch tensor to LongTensor.
     # Use .item() to convert a torch tensor of size 1 to python scalar.
-    pass
+    return torch.sum(torch.argmax(logit, dim=1) == target).item()
