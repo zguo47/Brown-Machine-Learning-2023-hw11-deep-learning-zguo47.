@@ -72,12 +72,12 @@ def test_cnn(test_size=0.2):
     # TODO: Tune these hyper-parameters
     # Hyper-parameters of CNN
     batch_size = 64  # batch size
-    num_epoch = 75  # number of training epochs
+    num_epoch = 25  # number of training epochs
     learning_rate = 0.001  # learning rate
 
     # Load data
     # TODO: Set to True when doing the third report question
-    shuffle_train_label = True
+    shuffle_train_label = False 
     dataloader_train, dataloader_test = get_mnist_loader(batch_size=batch_size, test_size=test_size,
                                                          shuffle_train_label=shuffle_train_label)
 
