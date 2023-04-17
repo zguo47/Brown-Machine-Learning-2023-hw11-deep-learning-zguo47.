@@ -1,6 +1,3 @@
-import os
-
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from models import OneLayerNN, TwoLayerNN, CNN, train, test, correct_predict_num
 from utils import get_mnist_loader, get_wine_loader, \
     visualize_loss, visualize_accuracy, visualize_image, visualize_confusion_matrix, visualize_misclassified_image
@@ -75,12 +72,12 @@ def test_cnn(test_size=0.2):
     # TODO: Tune these hyper-parameters
     # Hyper-parameters of CNN
     batch_size = 64  # batch size
-    num_epoch = 25  # number of training epochs
+    num_epoch = 75  # number of training epochs
     learning_rate = 0.001  # learning rate
 
     # Load data
     # TODO: Set to True when doing the third report question
-    shuffle_train_label = False
+    shuffle_train_label = True
     dataloader_train, dataloader_test = get_mnist_loader(batch_size=batch_size, test_size=test_size,
                                                          shuffle_train_label=shuffle_train_label)
 
@@ -120,8 +117,8 @@ def main():
     torch.manual_seed(0)
 
     # Uncomment to test your models
-    test_linear_nn(nn_type='one_layer')
-    test_linear_nn(nn_type='two_layer')
+    # test_linear_nn(nn_type='one_layer')
+    # test_linear_nn(nn_type='two_layer')
     test_cnn()
 
 
